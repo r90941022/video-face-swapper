@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+
+# Video files and large data
+input/*.mp4
+input/*.avi
+input/*.mov
+output/
+*.mp4
+*.avi
+*.mov
+
+# Target images (personal data)
+target_images/*/
+
+# Logs
+*.log
+logs/
+
+# Models (will be downloaded)
+models/*.onnx
+models/*.pth
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

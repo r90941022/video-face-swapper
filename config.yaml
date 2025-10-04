@@ -1,0 +1,42 @@
+# Video Changer Configuration
+
+# Frame Sampling Settings
+frame_sampling:
+  target_samples: 200           # Target number of frames to sample for analysis
+  min_interval_seconds: 1.5     # Minimum interval between samples for long videos
+  save_debug_images: true       # Save debug visualization images
+
+# Dominant Face Detection
+dominant_face:
+  weight_frequency: 0.4         # Weight for appearance frequency
+  weight_size: 0.4              # Weight for face size
+  weight_clarity: 0.2           # Weight for face clarity/quality
+  min_face_size: 50             # Minimum face size in pixels (lowered to detect more faces)
+  detection_threshold: 0.3      # Face detection confidence threshold (lowered for better recall)
+
+# Face Processing Settings
+face_processing:
+  model: inswapper_128          # Face swap model to use
+  face_enhancer: gfpgan_1.4     # Face enhancement model
+  blend_ratio: 0.75             # Blending ratio for face fusion
+  face_mask_blur: 0.3           # Face mask edge blur amount
+  face_mask_padding: [0, 0, 0, 0]  # Face mask padding [top, right, bottom, left]
+
+# Video Processing
+video:
+  keep_fps: true                # Preserve original video FPS
+  keep_audio: true              # Preserve original audio track
+  output_quality: high          # Output quality: low, medium, high
+  batch_size: 4                 # Number of frames to process in parallel
+  temp_frame_format: png        # Temporary frame format: jpg, png
+
+# Hardware
+hardware:
+  execution_provider: cuda      # cuda, cpu, or coreml (for Mac)
+  gpu_id: 0                     # GPU device ID to use
+
+# Debug and Logging
+debug:
+  verbose: true                 # Print detailed logs
+  save_intermediate: true       # Save intermediate results for each step
+  step_by_step_mode: true       # Pause after each step for user confirmation
