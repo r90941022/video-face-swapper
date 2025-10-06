@@ -57,10 +57,10 @@ class DominantFaceAnalyzer:
     """Analyzes faces across frames to find the dominant one"""
 
     def __init__(self,
-                 weight_frequency: float = 0.4,
-                 weight_size: float = 0.4,
-                 weight_clarity: float = 0.2,
-                 similarity_threshold: float = 0.4):
+                 weight_frequency: float = 0.7,
+                 weight_size: float = 0.2,
+                 weight_clarity: float = 0.1,
+                 similarity_threshold: float = 0.25):
         """
         Initialize dominant face analyzer
 
