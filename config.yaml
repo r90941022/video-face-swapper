@@ -11,7 +11,7 @@ dominant_face:
   weight_frequency: 0.4         # Weight for appearance frequency
   weight_size: 0.4              # Weight for face size
   weight_clarity: 0.2           # Weight for face clarity/quality
-  min_face_size: 20             # Minimum face size in pixels (lowered from 50 to detect smaller faces)
+  min_face_size: 1              # Minimum face size in pixels (set to 1 to detect all faces regardless of size)
   detection_threshold: 0.3      # Face detection confidence threshold (lowered for better recall)
   gender_filter: true           # Enable gender filtering (V2 Phase 1 feature)
   target_gender: F              # Target gender: 'M' for male, 'F' for female, null to disable
