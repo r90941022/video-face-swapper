@@ -159,6 +159,32 @@ class VideoChanger:
         self.logger.info("STEP 2: FACE DETECTION")
         self.logger.info("="*60)
 
+        # Auto-select GPU if using CUDA (V2 Phase 1 feature)
+        gpu_id = self.config['hardware']['gpu_id']
+        if self.config['hardware']['execution_provider'] == 'cuda':
+            # Check if auto-selection is requested
+            if gpu_id == 'auto':
+                try:
+                    from gpu_utils import select_best_gpus
+                    import os
+                    selected_gpus = select_best_gpus(num_gpus=1)
+                    if selected_gpus:
+                        gpu_id = selected_gpus[0]
+                        # Set CUDA_VISIBLE_DEVICES to selected GPU
+                        os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
+                        self.logger.info(f"Auto-selected GPU: {gpu_id}")
+                    else:
+                        gpu_id = 0  # Fallback to GPU 0
+                        self.logger.warning(f"GPU auto-selection returned no GPUs, using default GPU {gpu_id}")
+                except Exception as e:
+                    gpu_id = 0  # Fallback to GPU 0
+                    self.logger.warning(f"GPU auto-selection failed: {e}, using default GPU {gpu_id}")
+            else:
+                # Use specified GPU ID
+                import os
+                os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
+                self.logger.info(f"Using specified GPU: {gpu_id}")
+
         # Initialize detector
         self.face_detector = FaceDetector(
             detection_threshold=self.config['dominant_face']['detection_threshold'],
@@ -194,13 +220,15 @@ class VideoChanger:
             weight_clarity=self.config['dominant_face']['weight_clarity']
         )
 
-        # Analyze
+        # Analyze (with V2 Phase 1: gender filtering support)
         self.dominant_identity, self.all_identities = \
             self.dominant_analyzer.analyze(
                 self.detection_results,
                 self.sampled_frames,
                 save_debug=self.config['debug']['save_intermediate'],
-                output_dir="output"
+                output_dir="output",
+                gender_filter=self.config['dominant_face'].get('gender_filter', False),
+                target_gender=self.config['dominant_face'].get('target_gender', None)
             )
 
         self.logger.info(f"\n✓ Identified dominant face: ID {self.dominant_identity.face_id}")

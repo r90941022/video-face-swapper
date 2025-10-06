@@ -82,7 +82,9 @@ class DominantFaceAnalyzer:
                 detection_results: Dict[int, List[DetectedFace]],
                 frames: List[np.ndarray] = None,
                 save_debug: bool = False,
-                output_dir: str = None) -> Tuple[FaceIdentity, List[FaceIdentity]]:
+                output_dir: str = None,
+                gender_filter: bool = False,
+                target_gender: str = None) -> Tuple[FaceIdentity, List[FaceIdentity]]:
         """
         Analyze detected faces to find the dominant one
 
@@ -91,11 +93,17 @@ class DominantFaceAnalyzer:
             frames: Optional list of frames for debug visualization
             save_debug: Whether to save debug visualizations
             output_dir: Output directory
+            gender_filter: Enable gender filtering (Phase 1 V2 feature)
+            target_gender: Target gender ('M' or 'F')
 
         Returns:
             Tuple of (dominant_face_identity, all_face_identities)
         """
         logger.info("Analyzing faces to find dominant identity...")
+
+        # Step 0: Apply gender filtering if enabled (V2 Phase 1 feature)
+        if gender_filter and target_gender:
+            detection_results = self._filter_by_gender(detection_results, target_gender)
 
         # Step 1: Track faces across frames
         self._track_faces(detection_results)
@@ -344,13 +352,14 @@ class DominantFaceAnalyzer:
         id_to_color = {identity.face_id: colors[i]
                       for i, identity in enumerate(self.face_identities.values())}
 
-        # Sample frames to visualize
-        num_vis_frames = min(16, len(frames))
-        vis_frame_indices = np.linspace(0, len(frames)-1, num_vis_frames, dtype=int)
+        # Sample frames to visualize (from frames that have faces after filtering)
+        num_vis_frames = min(16, len(frame_indices))
+        sampled_frame_indices = np.linspace(0, len(frame_indices)-1, num_vis_frames, dtype=int)
 
         vis_frames = []
-        for array_idx in vis_frame_indices:
-            frame_idx = frame_indices[array_idx]
+        for idx in sampled_frame_indices:
+            frame_idx = frame_indices[idx]
+            array_idx = frame_idx_to_array_idx[frame_idx]
             frame = frames[array_idx].copy()
 
             # Draw all faces with their identity colors
@@ -444,6 +453,42 @@ class DominantFaceAnalyzer:
 
         grid = np.vstack(grid_rows)
         return grid
+
+    def _filter_by_gender(self,
+                         detection_results: Dict[int, List[DetectedFace]],
+                         target_gender: str) -> Dict[int, List[DetectedFace]]:
+        """
+        Filter faces by gender (V2 Phase 1 feature)
+
+        Args:
+            detection_results: Dictionary mapping frame_idx -> list of DetectedFace
+            target_gender: Target gender ('M' or 'F')
+
+        Returns:
+            Filtered detection results containing only target gender faces
+        """
+        logger.info(f"Filtering faces by gender: {target_gender}")
+
+        # Count total faces before filtering
+        total_faces = sum(len(faces) for faces in detection_results.values())
+
+        # Filter faces
+        filtered_results = {}
+        for frame_idx, faces in detection_results.items():
+            filtered_faces = [f for f in faces if f.gender == target_gender]
+            if filtered_faces:
+                filtered_results[frame_idx] = filtered_faces
+
+        # Count filtered faces
+        filtered_faces_count = sum(len(faces) for faces in filtered_results.values())
+        filtered_out_count = total_faces - filtered_faces_count
+
+        logger.info("Gender filtering results:")
+        logger.info(f"  - Total faces detected: {total_faces}")
+        logger.info(f"  - Faces matching gender '{target_gender}': {filtered_faces_count}")
+        logger.info(f"  - Filtered out: {filtered_out_count}")
+
+        return filtered_results
 
 
 if __name__ == "__main__":

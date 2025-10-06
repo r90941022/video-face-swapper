@@ -24,6 +24,8 @@ class DetectedFace:
     embedding: Optional[np.ndarray] = None  # 512-dim feature vector
     frame_idx: Optional[int] = None
     face_id: Optional[int] = None  # Unique ID assigned during tracking
+    gender: Optional[str] = None  # 'M' for male, 'F' for female
+    age: Optional[int] = None  # Estimated age
 
 
 class FaceDetector:
@@ -141,11 +143,22 @@ class FaceDetector:
             if face_width < self.min_face_size or face_height < self.min_face_size:
                 continue
 
+            # Extract gender and age if available
+            gender = None
+            age = None
+            if hasattr(face, 'gender'):
+                # InsightFace returns 0 for female, 1 for male
+                gender = 'F' if face.gender == 0 else 'M'
+            if hasattr(face, 'age'):
+                age = int(face.age)
+
             detected_face = DetectedFace(
                 bbox=bbox,
                 landmarks=face.kps,
                 confidence=float(face.det_score),
-                embedding=face.embedding if hasattr(face, 'embedding') else None
+                embedding=face.embedding if hasattr(face, 'embedding') else None,
+                gender=gender,
+                age=age
             )
             detected_faces.append(detected_face)
 

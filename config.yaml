@@ -3,7 +3,7 @@
 # Frame Sampling Settings
 frame_sampling:
   target_samples: 200           # Target number of frames to sample for analysis
-  min_interval_seconds: 1.5     # Minimum interval between samples for long videos
+  min_interval_seconds: 2.5     # Minimum interval between samples for long videos
   save_debug_images: true       # Save debug visualization images
 
 # Dominant Face Detection
@@ -11,8 +11,10 @@ dominant_face:
   weight_frequency: 0.4         # Weight for appearance frequency
   weight_size: 0.4              # Weight for face size
   weight_clarity: 0.2           # Weight for face clarity/quality
-  min_face_size: 50             # Minimum face size in pixels (lowered to detect more faces)
+  min_face_size: 20             # Minimum face size in pixels (lowered from 50 to detect smaller faces)
   detection_threshold: 0.3      # Face detection confidence threshold (lowered for better recall)
+  gender_filter: true           # Enable gender filtering (V2 Phase 1 feature)
+  target_gender: F              # Target gender: 'M' for male, 'F' for female, null to disable
 
 # Face Processing Settings
 face_processing:
@@ -33,7 +35,7 @@ video:
 # Hardware
 hardware:
   execution_provider: cuda      # cuda, cpu, or coreml (for Mac)
-  gpu_id: 0                     # GPU device ID to use
+  gpu_id: auto                  # GPU device ID to use (set to 'auto' for automatic selection of least-loaded GPU)
 
 # Debug and Logging
 debug:
